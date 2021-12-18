@@ -1,5 +1,8 @@
+#![allow(dead_code)]
+#![allow(non_camel_case_types)]
 mod day01_2;
 mod day02;
+mod day03;
 
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -27,6 +30,6 @@ fn day01_1() -> std::io::Result<()> {
 
 fn main() -> std::io::Result<()> {
     // day01_2::day01_2()?;
-    day02::part1();
+    day03::part2()?;
     Ok(())
 }
