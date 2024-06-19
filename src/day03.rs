@@ -1,7 +1,7 @@
 use std::fs::File;
-use std::io::{self, BufRead, Lines, BufReader};
+use std::io::{self, BufRead}; //, Lines, BufReader
 use std::convert::TryFrom;
-use std::fmt::Error;
+// use std::fmt::Error;
 // use crate::day03::bit_criteria::o2;
 
 #[derive(PartialEq)]
@@ -39,7 +39,7 @@ fn filter_list(list_in: &Vec<u32>, index: u8, kind: BitCriteria) -> Vec<u32> {
 
 fn file_to_vec(file_name: &str) -> std::io::Result<(Vec<u32>, i32)> {
     let file = File::open(file_name)?;
-    let mut lines = io::BufReader::new(file).lines();
+    let lines = io::BufReader::new(file).lines();
     let mut ret_val :Vec<u32> = Vec::new();
     let mut line_len :i32 = 0;
     for line in lines {

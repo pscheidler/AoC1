@@ -1,0 +1,1 @@
+This is some Rust code to work on the Advent of Code 2021 challenge at https://adventofcode.com/2021

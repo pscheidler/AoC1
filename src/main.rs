@@ -1,35 +1,15 @@
 #![allow(dead_code)]
-#![allow(non_camel_case_types)]
-mod day01_2;
+mod common;
+mod day01;
 mod day02;
 mod day03;
 
-use std::fs::File;
-use std::io::{self, BufRead};
-//use std::io::prelude::*;
+use std::io;
+use crate::common::{*};
 
-fn day01_1() -> std::io::Result<()> {
-    println!("Starting!");
-
-    let file = File::open("InputData_01.txt")?;
-    let lines = io::BufReader::new(file).lines();
-    let mut previous_value = -1;
-    let mut increase_count = 0;
-    for line in lines {
-        let reading = line?;
-        let value : i32 = reading.parse().unwrap();
-        if previous_value >= 0 && previous_value < value {
-            increase_count += 1;
-        }
-        previous_value = value;
-        println!("{}", value);
-    }
-    println!("Got {} increases!", increase_count);
-    Ok(())
-}
-
-fn main() -> std::io::Result<()> {
+fn main() -> io::Result<()> {
+    day01::day01_1(DEBUG_MIN, "InputData_01.txt")?;
     // day01_2::day01_2()?;
-    day03::part2()?;
+    // day03::part2()?;
     Ok(())
 }
