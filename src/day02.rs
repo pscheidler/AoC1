@@ -2,9 +2,10 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use crate::common::{DEBUG_MIN, DEBUG_OFF, DEBUG_ALL};
 
-struct Command {
-    dir : String,
-    dist: u32
+enum Command {
+    Forward(u32),
+    Up(u32),
+    Down(u32)
 }
 
 fn read_command(debug_level: u8, line: String) -> std::io::Result<Command> {
@@ -18,7 +19,13 @@ fn read_command(debug_level: u8, line: String) -> std::io::Result<Command> {
     if debug_level == DEBUG_ALL {
         println!("Turned {line} into {dir}, {dist}")
     }
-    Ok(Command{dir, dist})
+    match dir.as_str() {
+        "forward" => Ok(Command::Forward(dist)),
+        "up" => Ok(Command::Up(dist)),
+        "down" => Ok(Command::Down(dist)),
+        _ => panic!("Unexpected word")
+    }
+    // Ok(Command{dir, dist})
 }
 
 pub fn day02_1(debug_level: u8, file_in: &str) -> std::io::Result<u32> {
@@ -33,15 +40,11 @@ pub fn day02_1(debug_level: u8, file_in: &str) -> std::io::Result<u32> {
 
     for line_result in lines {
         let line = line_result.expect("Can't read line");
-        let command: Command = read_command(debug_level, line).unwrap();
-        if command.dir == "forward" {
-            horiz += command.dist;
-        } else if command.dir == "up" {
-            depth -= command.dist;
-        } else if command.dir == "down" {
-            depth += command.dist;
-        } else {
-            println!("Unknown command {}", command.dir);
+        let command: Command = read_command(debug_level, line)?;
+        match command {
+            Command::Forward(dist) => horiz += dist,
+            Command::Up(dist)      => depth -= dist,
+            Command::Down(dist)    => depth += dist
         }
     }
     if debug_level > DEBUG_OFF {
@@ -64,16 +67,14 @@ pub fn day02_2(debug_level: u8, file_in: &str) -> std::io::Result<u32> {
 
     for line_result in lines {
         let line = line_result.expect("Can't read line");
-        let command: Command = read_command(debug_level, line).unwrap();
-        if command.dir == "forward" {
-            horiz += command.dist;
-            depth += command.dist * aim;
-        } else if command.dir == "up" {
-            aim -= command.dist;
-        } else if command.dir == "down" {
-            aim += command.dist;
-        } else {
-            println!("Unknown command {}", command.dir);
+        let command: Command = read_command(debug_level, line)?;
+        match command {
+            Command::Forward(dist) => {
+                horiz += dist;
+                depth += dist * aim;
+            },
+            Command::Up(dist) => aim -= dist,
+            Command::Down(dist) => aim += dist
         }
     }
     if debug_level > DEBUG_OFF {
