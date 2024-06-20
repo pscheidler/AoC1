@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead}; //, Lines, BufReader
 use std::convert::TryFrom;
+use crate::common::{DEBUG_OFF, DEBUG_MIN, DEBUG_ALL};
 // use std::fmt::Error;
 // use crate::day03::bit_criteria::o2;
 
@@ -76,40 +77,51 @@ pub fn part2() -> std::io::Result<()> {
     Ok(())
 }
 
-fn read_binary_line(line: String, current_value: [i32;12]) -> std::io::Result<[i32;12]> {
-    let mut local_count = current_value;
+fn read_binary_line(line: String, majority_values: [i32;12]) -> std::io::Result<[i32;12]> {
+    // majority_values is the current list of which is top, 1 (positive value) or 0 (neg)
+    let mut local_count = majority_values;
     for (i, bit) in line.chars().enumerate() {
-        if bit == '1' {
-            local_count[11-i] += 1;
-        } else {
-            local_count[11-i] -= 1;
-        }
+        let is_one = match bit {
+            '1' => 1,
+            '0' => -1,
+            _ => panic!("Illegal character in string {line}")
+        };
+        local_count[11-i] += is_one;    // Note that the order of the characters is reversed. Bit 0 is the low bit
     }
     Ok(local_count)
 }
 
-pub fn part1() -> std::io::Result<()> {
-    let file = File::open("InputData_03.txt")?;
+pub fn day03_1(debug_level: u8, file_in: &str) -> std::io::Result<i64> {
+    if debug_level > DEBUG_OFF {
+        println!("Starting Day 03, Part 1")
+    }
+    let file = File::open(file_in).expect(&format!("Can't open {file_in}"));
     let lines = io::BufReader::new(file).lines();
 
     let mut bit_count :[i32;12] = [0;12];
     for line in lines {
         bit_count = read_binary_line(line?, bit_count)?;
     }
+
     let mut gamma_rate :i64 = 0;
     let mut epsilon_rate :i64 = 0;
-    println!("2^4={}", i32::pow(2, 4));
-    for (i, bit_val) in bit_count.iter().enumerate() {
-        println!("{}, {}", bit_val, i);
-        if *bit_val == 0 {
-            println!("Error, exact balance of 1s and 0s in bit {}", i);
-        } else if *bit_val > 0 {
-            gamma_rate += i64::pow(2,   u32::try_from(i).unwrap());
-        } else {
-            epsilon_rate += i64::pow(2, u32::try_from(i).unwrap());
+    for bit_val in bit_count.iter().rev() {
+        if debug_level == DEBUG_ALL {
+            println!("Bit Value = {bit_val}");
         }
-        println!("{}, {}", gamma_rate, epsilon_rate);
+        gamma_rate *= 2;
+        epsilon_rate *= 2;
+        if *bit_val == 0 {
+            println!("Error, exact balance of 1s and 0s");
+        } else if *bit_val > 0 {
+            gamma_rate += 1;
+        } else {
+            epsilon_rate += 1;
+        }
+        if debug_level == DEBUG_ALL {
+            println!("Gamma = {gamma_rate}, Epsilon = {epsilon_rate}");
+        }
     }
-    println!("gamma = {}, epsilon = {}, product = {}", gamma_rate, epsilon_rate, gamma_rate * epsilon_rate);
-    Ok(())
+    println!("gamma = {gamma_rate}, epsilon = {epsilon_rate}, product = {}", gamma_rate * epsilon_rate);
+    Ok(gamma_rate * epsilon_rate)
 }

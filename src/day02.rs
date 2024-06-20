@@ -56,7 +56,7 @@ pub fn day02_1(debug_level: u8, file_in: &str) -> std::io::Result<u32> {
 
 pub fn day02_2(debug_level: u8, file_in: &str) -> std::io::Result<u32> {
     if debug_level > DEBUG_OFF {
-        println!("Starting Day 02, Part 1")
+        println!("Starting Day 02, Part 2")
     }
     let file = File::open(file_in).expect(&format!("Can't open {file_in}"));
     let lines = io::BufReader::new(file).lines();
