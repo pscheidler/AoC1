@@ -8,8 +8,10 @@ use std::io;
 use crate::common::{*};
 
 fn main() -> io::Result<()> {
-    day01::day01_1(DEBUG_MIN, "InputData_01.txt")?;
-    // day01_2::day01_2()?;
+    // day01::day01_1(DEBUG_MIN, "InputData_01.txt")?;
+    // day01::day01_2(DEBUG_MIN, "InputData_01.txt")?;
+    day02::day02_1(DEBUG_MIN, "InputData_02.txt")?;
+    day02::day02_2(DEBUG_MIN, "InputData_02.txt")?;
     // day03::part2()?;
     Ok(())
 }
