@@ -1,81 +1,71 @@
 use std::fs::File;
 use std::io::{self, BufRead}; //, Lines, BufReader
-use std::convert::TryFrom;
 use crate::common::{DEBUG_OFF, DEBUG_MIN, DEBUG_ALL};
-// use std::fmt::Error;
-// use crate::day03::bit_criteria::o2;
 
-#[derive(PartialEq)]
-#[derive(Copy, Clone)]
-enum BitCriteria {
-    o2,
-    co2,
-}
 
-fn filter_list(list_in: &Vec<u32>, index: u8, kind: BitCriteria) -> Vec<u32> {
-    let mut one :Vec<u32> = Vec::new();
-    let mut zero :Vec<u32> = Vec::new();
-
-    let mask :u32 = 1 << index;
-
-    for value in list_in {
-        if (value & mask) > 0 {
-            // println!("1: {} ({})", value, one.len());
-            one.push(*value);
+fn split_bins(input_list: &Vec<String>, position: usize) -> std::io::Result<(Vec<String>, Vec<String>)> {
+    let mut with_one: Vec<String> = Vec::new();
+    let mut with_zero: Vec<String> = Vec::new();
+    for line in input_list {
+        if line.chars().nth(position) == Some('1') {
+            with_one.push(line.clone());
         } else {
-            // println!("0: {}, ({})", value, zero.len());
-            zero.push(*value);
+            with_zero.push(line.clone());
         }
     }
-    println!("1s = {}, 0s = {}", one.len(), zero.len());
-    let keep_one :bool = one.len() >= zero.len();
-    let is_co2 :bool = kind == BitCriteria::co2;
-    if keep_one ^ is_co2 {
-        println!("Keeping the ones");
-        return one;
-    }
-    println!("Keeping the zeros");
-    return zero;
+    Ok((with_one, with_zero))
 }
 
-fn file_to_vec(file_name: &str) -> std::io::Result<(Vec<u32>, i32)> {
-    let file = File::open(file_name)?;
+
+fn find_common_element(input_list: &Vec<String>, use_most: bool) -> std::io::Result<i32> {
+    let mut active_list = input_list;
+    let mut active_length = 1000;
+    let mut one :Vec<String>;
+    let mut zero:Vec<String>;
+
+    let mut position :usize = 0;
+    let mut use_one :bool = false;
+    while active_length > 1 {
+        (one, zero) = split_bins(active_list, position).expect("Can't handle");
+        if use_most {
+            use_one = one.len() >= zero.len();
+        } else {
+            use_one = one.len() < zero.len();
+        }
+        if use_one {
+            active_list = &one;
+        } else {
+            active_list = &zero;
+        }
+        position += 1;
+        active_length = active_list.len();
+    }
+
+    // let result :i32 = active_list[0].clone().parse().expect("Failed");
+    let result = i32::from_str_radix(active_list[0].as_str(), 2).expect("Could not parse binary") ;
+    //active_list[0].parse().expect("Failed");
+    Ok(result)
+}
+
+pub fn day03_2(debug_level: u8, file_in: &str) -> std::io::Result<i64> {
+    if debug_level > DEBUG_OFF {
+        println!("Starting Day 03, Part 2")
+    }
+    let file = File::open(file_in).expect(&format!("Can't open {file_in}"));
     let lines = io::BufReader::new(file).lines();
-    let mut ret_val :Vec<u32> = Vec::new();
-    let mut line_len :i32 = 0;
-    for line in lines {
-        let line = line.unwrap();
-        let parsed = u32::from_str_radix(line.as_str(), 2).unwrap();
-        line_len = line.len() as i32;
-        ret_val.push(parsed)
+
+    let root_list: Vec<String> = lines.map(|l| l.expect("Cannot parse line"))
+        .collect();
+
+    let o2_rating :i64 = find_common_element(&root_list, true).expect("O2 Failed") as i64;
+    let co2_rating :i64 = find_common_element(&root_list, false).expect("CO2 Failed") as i64;
+
+    if debug_level > DEBUG_OFF {
+        println!("Result {o2_rating}, CO2={co2_rating} product = {}", o2_rating*co2_rating)
     }
-    Ok((ret_val, line_len))
+    Ok(o2_rating*co2_rating)
 }
 
-fn get_value(file_name: &str, kind: BitCriteria) -> std::io::Result<i32> {
-    let (mut data_list, bit_count) = file_to_vec(file_name)?;
-
-    println!("Found length of {}", bit_count);
-
-    for index in (0..(bit_count)).rev() {
-        data_list = filter_list(&data_list, index as u8, kind);
-        println!("Checked bit {}, {} items remain", index, data_list.len());
-        if data_list.len() == 1 {
-            println!("Got {}", data_list[0]);
-            return Ok(data_list[0] as i32)
-        }
-    }
-    panic!("Didn't find any value!")
-}
-
-pub fn part2() -> std::io::Result<()> {
-    let input_file = "InputData_03.txt";
-    let o2Value  = get_value(&input_file, BitCriteria::o2)?;
-    let co2Value  = get_value(&input_file, BitCriteria::co2)?;
-    let result = o2Value * co2Value;
-    println!("Result is {}", result);
-    Ok(())
-}
 
 fn read_binary_line(line: String, majority_values: [i32;12]) -> std::io::Result<[i32;12]> {
     // majority_values is the current list of which is top, 1 (positive value) or 0 (neg)
@@ -90,6 +80,7 @@ fn read_binary_line(line: String, majority_values: [i32;12]) -> std::io::Result<
     }
     Ok(local_count)
 }
+
 
 pub fn day03_1(debug_level: u8, file_in: &str) -> std::io::Result<i64> {
     if debug_level > DEBUG_OFF {
