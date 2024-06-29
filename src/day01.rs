@@ -11,7 +11,7 @@ pub fn day01_1(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
     let file = File::open(file_in).expect(&format!("Can't open file {file_in}"));
     let mut lines = io::BufReader::new(file).lines();
     // Read the first line into the top value separately
-    let mut first_line = lines.next()
+    let first_line = lines.next()
         .expect("Problem running next on first line")
         .expect("Problem reading first line out");
     let mut previous_value :i32 = first_line.parse()

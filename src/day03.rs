@@ -24,7 +24,7 @@ fn find_common_element(input_list: &Vec<String>, use_most: bool) -> std::io::Res
     let mut zero:Vec<String>;
 
     let mut position :usize = 0;
-    let mut use_one :bool = false;
+    let mut use_one :bool;
     while active_length > 1 {
         (one, zero) = split_bins(active_list, position).expect("Can't handle");
         if use_most {

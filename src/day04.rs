@@ -128,7 +128,7 @@ fn day04_setup(file_in: &str) -> (Vec<Board>, [Vec<NumberSpot>; 100], Vec<i32>) 
     let mut select_helper: [Vec<NumberSpot>; 100] = [select_helper_init; 100];
     const init_value: NumberStatus = Unselected(0);
     {
-        let mut board = Board {
+        let board = Board {
             numbers: [[init_value; 5]; 5],
             won: false,
         };
@@ -139,7 +139,7 @@ fn day04_setup(file_in: &str) -> (Vec<Board>, [Vec<NumberSpot>; 100], Vec<i32>) 
         let line = line_result.expect("Problem accessing line");
         if is_blank(&line) {
             row_index = 0;
-            let mut board = Board {
+            let board = Board {
                 numbers: [[init_value; 5]; 5],
                 won: false,
             };
