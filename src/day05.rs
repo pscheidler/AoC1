@@ -76,6 +76,11 @@ impl RegularLine {
             // Lines aren't parallel, so find where they would intersect, and then make sure that
             // point exists for both lines
             // We're trying to find X where S1 * X + Off1 = S2 * X + Off2, so X = (Off2 - Off1) / (S1 - S2)
+            let remainder = (self.offset - other.offset) % (other.slope - self.slope);
+            if remainder != 0 {
+                // There is no real intersection, the 2 lines slip by eachother
+                return None;
+            }
             let x: i32 = (self.offset - other.offset) / (other.slope - self.slope);
             if x < overlap_start || x > overlap_end {
                 return None;
@@ -112,8 +117,8 @@ impl RegularLine {
             match result {
                 Some(value) => {
                     let intersect_count = value.iter().count();
-                    // println!("Found {intersect_count} hits between {:?} and {:?}", self, old_vent_line);
-                    // println!("See {:?} (Reg)", value.first());
+                    println!("Found {intersect_count} hits between {:?} and {:?}", self, old_vent_line);
+                    println!("See {:?} (Reg)", value.first());
                     for point in value.iter() {
                         return_vec.push(*point);
                     }
@@ -286,15 +291,15 @@ fn process_line(line: &String) -> GenericLine {
 }
 
 fn day05(debug_level: u8, file_in: &str, use_diags: bool) -> std::io::Result<i32> {
-    if debug_level > DEBUG_OFF {
-        println!("Starting Day 05, Part 1")
-    }
     let file = File::open(file_in).expect(&format!("Can't open {file_in}"));
     let mut lines = io::BufReader::new(file).lines();
     let mut line_list: Vec<GenericLine> = Vec::new();
     let mut intersect_holder: IntersectionHolder = make_intersection_holder();
+    let mut last_count = 0;
+    let mut line_counter: i32 = 0;
 
     for line_result in lines {
+        line_counter += 1;
         let line = line_result.expect("Could not process line");
         let new_vent_line = process_line(&line);
         match new_vent_line {
@@ -319,8 +324,11 @@ fn day05(debug_level: u8, file_in: &str, use_diags: bool) -> std::io::Result<i32
             },
             _ => panic!("Illegal Line Type"),
         };
-        // println!("Current count is {}", intersect_holder.get_intersection_count());
-        // intersect_holder.error_check();
+        let current_count = intersect_holder.get_intersection_count();
+        if current_count != last_count {
+            println!("Line {line_counter}, advanced {} to {}", current_count-last_count, current_count);
+            last_count = current_count;
+        }
     }
     let final_count: i32 = intersect_holder.get_intersection_count();
     println!("Counted {final_count}");
@@ -328,9 +336,15 @@ fn day05(debug_level: u8, file_in: &str, use_diags: bool) -> std::io::Result<i32
 }
 
 pub fn day05_1(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
+    if debug_level > DEBUG_OFF {
+        println!("Starting Day 05, Part 1")
+    }
     day05(debug_level, file_in, false)
 }
 
 pub fn day05_2(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
+    if debug_level > DEBUG_OFF {
+        println!("Starting Day 05, Part 2")
+    }
     day05(debug_level, file_in, true)
 }
