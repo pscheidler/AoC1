@@ -6,6 +6,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 use std::io;
 use crate::common::{*};
@@ -21,7 +22,9 @@ fn main() -> io::Result<()> {
     // day04::day04_1(DEBUG_ALL, "InputData_04.txt")?;
     // day04::day04_2(DEBUG_ALL, "InputData_04.txt")?;
     // day05::day05_1(DEBUG_ALL, "InputData_05.txt")?;
-    day05::day05_2(DEBUG_ALL, "InputData_05.txt")?;
+    // day05::day05_2(DEBUG_ALL, "InputData_05.txt")?;
     // day05::day05_2(DEBUG_ALL, "TestInput_05.txt")?;
+    // day06::day06_1(DEBUG_ALL, "InputData_06.txt", 80);
+    day06::day06_2(DEBUG_ALL, "InputData_06.txt", 256);
     Ok(())
 }
