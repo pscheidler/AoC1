@@ -11,12 +11,12 @@ use std::fs::File;
 use std::io::{self, BufRead}; //, Lines, BufReader
 use crate::common::{DEBUG_OFF, DEBUG_MIN, DEBUG_ALL};
 
-enum SearchResult {
-    Answer(i32),
-    Target(i32),
-}
-fn cost_function(target: i32, start: &Vec<i32>) -> i32 {
-    start.iter().map(|x| (x - target).abs()).sum()
+fn cost_function(target: i32, start: &Vec<i32>, part1: bool) -> i32 {
+    if part1 {
+        start.iter().map(|x| (x - target).abs()).sum()
+    } else {
+        start.iter().map(|x| (0..=(x - target).abs()).sum::<i32>()).sum()
+    }
 }
 
 fn process_input(line_in:String) -> Vec<i32> {
@@ -25,32 +25,15 @@ fn process_input(line_in:String) -> Vec<i32> {
         .collect()
 }
 
-fn check_point(target: i32, step: i32, starting_points: &Vec<i32>) -> [i32; 3] {
+fn check_point(target: i32, step: i32, starting_points: &Vec<i32>, part1: bool) -> [i32; 3] {
 
-    let return_value: [i32; 3] = [cost_function(target-step, starting_points),
-        cost_function(target, starting_points), cost_function(target+step, starting_points)];
+    let return_value: [i32; 3] = [cost_function(target-step, starting_points, part1),
+        cost_function(target, starting_points, part1),
+        cost_function(target+step, starting_points, part1)];
     return_value
 }
 
-fn get_search_targets(target_number: i32, max: i32, min: i32, inclusive: bool) -> Vec<i32> {
-    let mut return_vec: Vec<i32> = Vec::new();
-    let mut divisor: i32 = target_number - 1;
-    let mut target: i32 = min;
-    if inclusive == false {
-        divisor = target_number + 1;
-    }
-    let step_size: i32 = (max - min) / (target_number-1);
-    if inclusive == false {
-        target += step_size;
-    }
-    for i in 0..target_number {
-        return_vec.push(target);
-        target += step_size;
-    }
-    return_vec
-}
-
-pub fn day07_1(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
+pub fn day07(debug_level: u8, file_in: &str, part1: bool) -> std::io::Result<i32> {
     if debug_level > DEBUG_OFF {
         println!("Starting Day 06, Part 1")
     }
@@ -65,7 +48,7 @@ pub fn day07_1(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
         if step_size > 1 {
             step_size = step_size / 2;
         }
-        let near_area: [i32; 3] = check_point(search_point, 1, &starting_points);
+        let near_area: [i32; 3] = check_point(search_point, 1, &starting_points, part1);
         println!("Checking at {search_point}, has fuel at {}", near_area[1]);
         if near_area[1] < near_area[0] && near_area[1] < near_area[2] {
             println!("Found hit at {search_point}, fuel = {}!", near_area[1]);
@@ -81,6 +64,4 @@ pub fn day07_1(debug_level: u8, file_in: &str) -> std::io::Result<i32> {
             search_point += step_size;
         }
     }
-
-    Ok(0)
 }
