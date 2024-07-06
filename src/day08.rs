@@ -130,71 +130,18 @@ fn check_display(display_input: &DisplayGroup, disp_sigs: &mut [DisplaySignal; 7
     }
 }
 
-struct SegmentPotential {
-    segs: [i32; 7]
+/// Return true if disp_sig could be in the timing display timing_group
+/// Return false if the display signal has been ruled out for matching any of the potential timing signals
+fn could_be_in(disp_sig: &DisplaySignal, timing_group: &[i8; 7]) -> bool {
+    for (time_pot, act_time) in zip(disp_sig.potential_timing_signals, timing_group) {
+        if time_pot == 1 && *act_time == 1 {
+            return true
+        }
+    }
+    false
 }
-
-fn make_segment_potential() -> SegmentPotential {
-    SegmentPotential {segs: [1; 7]}
-}
-
-// impl SegmentPotential {
-//
-//     fn check_self(&self) -> bool {
-//         let opt_left: i32 = self.segs.iter().sum();
-//         if opt_left == 1 {
-//             return true;
-//         } else if opt_left == 0 {
-//             panic!("No options left!");
-//         }
-//         false
-//     }
-//     fn set_option(&mut self, option: &[i32; 7]) -> bool {
-//         self.segs = self.segs.iter()
-//             .zip(option.iter())
-//             .map(|x, y| x*y)
-//             .collect();
-//         self.check_self()
-//     }
-//
-//     fn set_many_options(&mut self, options: &Vec<[i32; 7]>) -> bool {
-//         let mut could_be: [i32; 7] = [0; 7];
-//         for opt in options.iter() {
-//             let temp = could_be.iter().zip(opt.iter())
-//                 .map(|(a, b)| *a | *b)
-//                 .collect();
-//
-//         }
-//
-//         self.check_self()
-//     }
-//
-//     fn remove_option(&mut self, seg: usize) -> bool {
-//         self.segs[seg] = 0;
-//         self.check_self()
-//     }
-//
-//     fn get_segment(&self) -> Option<usize> {
-//         if self.check_self() == false {
-//             return None;
-//         }
-//         let temp: usize = self.segs.iter().position(|&n| n == 1).unwrap();
-//         Some(temp)
-//     }
-// }
 
 pub fn day08_1() {
-    // let mut d0 = make_display_group("cdeba".to_string());
-    // let mut d1 = make_display_group("gadec".to_string());
-    // let mut d2 = make_display_group("dafcgb".to_string());
-    // let mut d3 = make_display_group("bd".to_string());
-    // let mut d4 = make_display_group("cdb".to_string());
-    // let mut d5 = make_display_group("cdebga".to_string());
-    // let mut d6 = make_display_group("fadecg".to_string());
-    // let mut d7 = make_display_group("adcfbeg".to_string());
-    // let mut d8 = make_display_group("bacfe".to_string());
-    // let mut d9 = make_display_group("bedg".to_string());
-
     let mut test_input: [DisplayGroup; 10] = [
         make_display_group("cdeba".to_string()),
         make_display_group("gadec".to_string()),
@@ -207,15 +154,6 @@ pub fn day08_1() {
         make_display_group("bacfe".to_string()),
         make_display_group("bedg".to_string()),
     ];
-
-    // let mut la: DisplaySignal = make_display_signal('a');
-    // let mut lb: DisplaySignal = make_display_signal('b');
-    // let mut lc: DisplaySignal = make_display_signal('c');
-    // let mut ld: DisplaySignal = make_display_signal('d');
-    // let mut le: DisplaySignal = make_display_signal('e');
-    // let mut lf: DisplaySignal = make_display_signal('f');
-    // let mut lg: DisplaySignal = make_display_signal('g');
-
     let mut disp_sigs: [DisplaySignal; 7] = [
         make_display_signal('a'),
         make_display_signal('b'),
@@ -230,6 +168,27 @@ pub fn day08_1() {
     for i in 1..3 {
         for disp_group in test_input.iter_mut() {
             check_display(disp_group, &mut disp_sigs);
+        }
+        for disp_group in test_input.iter_mut() {
+            let mut to_remove: Vec<usize> = Vec::new();
+            for (index, time) in disp_group.potential_timing.iter().enumerate() {
+                let mut keep: bool = true;
+                for (sig_active, sig) in zip(disp_group.signals, &disp_sigs) {
+                    if sig_active != 0 {
+                        if could_be_in(sig, &time) == false {
+                            keep = false;
+                            break;
+                        }
+                    }
+                }
+                if keep == false {
+                    to_remove.push(index);
+                }
+            }
+            to_remove.reverse();
+            for rem_index in to_remove {
+                disp_group.potential_timing.remove(rem_index);
+            }
         }
     }
 }
