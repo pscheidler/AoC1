@@ -29,5 +29,6 @@ fn main() -> io::Result<()> {
     // day06::day06_2(DEBUG_ALL, "InputData_06.txt", 256);
     // day07::day07(DEBUG_ALL, "InputData_07.txt", true);
     // day07::day07(DEBUG_ALL, "InputData_07.txt", false);
+    day08::day08_1();
     Ok(())
 }
